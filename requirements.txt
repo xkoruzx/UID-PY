@@ -52,3 +52,4 @@ zstandard==0.22.0
 aiohttp==3.9.5
 python-dotenv==1.0.1
 protobuf-decoder
+pycryptodome

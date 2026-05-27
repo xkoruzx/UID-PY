@@ -7,6 +7,7 @@ import sqlite3
 import requests
 import copy
 import json
+import argparse
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
 sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
@@ -15,7 +16,7 @@ from mitmproxy import http
 from common.utils import aes_decrypt, encrypt_api, get_available_room, CrEaTe_ProTo
 
 # ==================== CONFIG ====================
-LISTEN_PORT = 9944
+LISTEN_PORT = 8080
 UID_FILE = "uid.txt"
 WHITELIST_MSG = "[ffffff] UID NOT AUTHORIZED\n\n[FFFFFF]UID: {uid} ."
 
@@ -337,7 +338,14 @@ addons = [MajorLoginInterceptor()]
 
 # ==================== STARTUP ====================
 if __name__ == "__main__":
-    print(f"MITM proxy on 0.0.0.0:{LISTEN_PORT}")
+    parser = argparse.ArgumentParser(description="MITM proxy for AXC safe UID bypass")
+    parser.add_argument("--port", "-p", type=int, default=LISTEN_PORT, help="Listen port for mitmproxy")
+    parser.add_argument("--host", default="192.168.1.106", help="Listen host for mitmproxy")
+    args, _ = parser.parse_known_args()
+    listen_port = args.port
+    listen_host = args.host
+
+    print(f"MITM proxy on {listen_host}:{listen_port}")
     print(f"UID file: {UID_FILE}")
     print(f"Firebase: {FIREBASE_DATABASE_URL}")
     
@@ -345,7 +353,7 @@ if __name__ == "__main__":
     proc = subprocess.Popen(
         [
             sys.executable, "-c",
-            f"import sys; from mitmproxy.tools.main import mitmdump; sys.argv = ['mitmdump', '-s', '{script_path}', '-p', '{LISTEN_PORT}', '--listen-host', '0.0.0.0', '--set', 'block_global=false']; mitmdump()",
+            f"import sys; from mitmproxy.tools.main import mitmdump; sys.argv = ['mitmdump', '-s', '{script_path}', '-p', '{listen_port}', '--listen-host', '{listen_host}', '--set', 'block_global=false']; mitmdump()",
         ]
     )
     try:
